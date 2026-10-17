@@ -1,0 +1,131 @@
+// Optional local-dev schema: SQLite (DATABASE_URL=file:dev.sqlite, relative to this folder).
+// Production uses prisma/schema.prisma (Postgres). Keep the models identical.
+// `npm run setup` picks this file automatically when DATABASE_URL starts with "file:".
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+/// One row per installed shop.
+model Shop {
+  shop          String    @id
+  plan          String    @default("FREE") // FREE | PRO (cache of the Billing API, refreshed on load + app_subscriptions/update)
+  planCheckedAt DateTime?
+  timezone      String    @default("UTC")
+  installedAt   DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+/// Google account linked by the merchant. Refresh token is AES-256-GCM encrypted.
+model GoogleConnection {
+  shop                  String   @id
+  email                 String?
+  encryptedRefreshToken String
+  scope                 String
+  connectedAt           DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+/// Export settings, sync state and the resumable sync job for the shop's single sheet.
+model SyncConfig {
+  shop             String    @id
+  spreadsheetId    String?
+  spreadsheetUrl   String?
+  sheetGid         Int?
+  sheetTitle       String    @default("Orders")
+  columns          String // JSON array of column keys
+  filters          String    @default("{}") // JSON StatusFilters
+  backfillFrom     String? // YYYY-MM-DD
+  backfillTo       String? // YYYY-MM-DD
+  layoutVersion    String? // hash of columns+filters the sheet was last built with
+  syncing          Boolean   @default(false) // true while a job exists (shown in the dashboard)
+  lockedUntil      DateTime? // lease: only one invocation writes the sheet at a time
+  leaseOwner       String? // random token of the invocation holding the lease
+  lastSuccessAt    DateTime?
+  lastErrorAt      DateTime?
+  lastError        String?
+  rowCount         Int       @default(0)
+  lastReconciledAt DateTime?
+  lastManualSyncAt DateTime?
+
+  // Resumable job (serverless): a sync is split into bounded chunks; progress lives here
+  // so the next invocation (manual click, dashboard poll or the scheduled function) continues it.
+  jobId           String? // changes when a job is started or replaced; stale chunks stop writing
+  jobKind         String? // BACKFILL | REBUILD | MANUAL | RECONCILE
+  jobPhase        String? // PREPARE | PAGES
+  jobCursor       String? // Shopify GraphQL endCursor of the last page written
+  jobParams       String? // JSON: search query, sort key, full/incremental, date window
+  jobForceRebuild Boolean   @default(false)
+  jobLogId        Int?
+  jobStartedAt    DateTime?
+  jobUpdatedAt    DateTime?
+  jobPages        Int       @default(0)
+  jobRowsWritten  Int       @default(0)
+  jobAttempts     Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([jobId])
+}
+
+/// Orders whose webhook could not be written inline (timeout, lock, error). The scheduled
+/// function re-fetches and upserts them; a later full/incremental job also covers them.
+model DirtyOrder {
+  shop     String
+  orderId  String
+  markedAt DateTime @default(now())
+  reason   String?
+
+  @@id([shop, orderId])
+  @@index([markedAt])
+}
+
+/// customers/redact requests not yet applied to the sheet (retried by the scheduled function).
+model PendingRedaction {
+  shop      String
+  orderId   String
+  createdAt DateTime @default(now())
+  attempts  Int      @default(0)
+
+  @@id([shop, orderId])
+}
+
+/// Append-only log shown in the UI (trimmed to the latest 200 per shop).
+model SyncLog {
+  id          Int       @id @default(autoincrement())
+  shop        String
+  kind        String // BACKFILL | REBUILD | WEBHOOK | RECONCILE | MANUAL
+  status      String // RUNNING | SUCCESS | ERROR | SKIPPED
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+  rowsWritten Int       @default(0)
+  message     String?
+
+  @@index([shop, startedAt])
+}
