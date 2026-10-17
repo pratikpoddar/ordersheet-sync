@@ -1,0 +1,51 @@
+# OrderSheet Sync – Shopify app configuration.
+# Production runs on Netlify. application_url is a placeholder until the Netlify site name is
+# confirmed: change both URLs below to https://<site>.netlify.app (or your custom domain), then
+# run `shopify app deploy` to push config, scopes and webhook subscriptions.
+client_id = "53fa8597a5e194cd86625190a18dcc1a"
+name = "OrderSheet Sync"
+application_url = "https://ordersheet-sync.netlify.app"
+embedded = true
+
+[access_scopes]
+# Read-only. The app never modifies orders.
+scopes = "read_orders"
+
+[auth]
+redirect_urls = [ "https://ordersheet-sync.netlify.app/auth/callback" ]
+
+[webhooks]
+api_version = "2026-10"
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/app/uninstalled"
+  topics = ["app/uninstalled"]
+
+  [[webhooks.subscriptions]]
+  topics = ["app/scopes_update"]
+  uri = "/webhooks/app/scopes_update"
+
+  [[webhooks.subscriptions]]
+  topics = ["app_subscriptions/update"]
+  uri = "/webhooks/app_subscriptions/update"
+
+  # Near real-time sync (Pro). Free shops are acknowledged and ignored.
+  [[webhooks.subscriptions]]
+  topics = ["orders/create", "orders/updated"]
+  uri = "/webhooks/orders"
+
+  # Mandatory compliance webhooks (required for App Store apps)
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/customers/data_request"
+  compliance_topics = ["customers/data_request"]
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/customers/redact"
+  compliance_topics = ["customers/redact"]
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/shop/redact"
+  compliance_topics = ["shop/redact"]
+
+[pos]
+embedded = false
