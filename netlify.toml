@@ -1,0 +1,18 @@
+# Netlify: React Router app as serverless functions + Supabase Postgres.
+# The React Router adapter (@netlify/vite-plugin-react-router, see vite.config.ts) emits one
+# function that serves every route; netlify/functions/reconcile.ts is the 15-minute scheduled sweep.
+
+[build]
+  # Generates the Prisma client (Postgres schema, incl. the Lambda engine) and builds the app.
+  # Migrations are NOT run here; apply them with `npm run db:deploy` (uses DIRECT_URL).
+  command = "npx prisma generate && npm run build"
+  publish = "build/client"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"
+  # Ship Prisma's query engine (rhel-openssl-3.0.x, see prisma/schema.prisma binaryTargets) and
+  # schema with every function; the JS client itself is traced automatically.
+  included_files = ["node_modules/.prisma/client/*.node", "node_modules/.prisma/client/schema.prisma"]
