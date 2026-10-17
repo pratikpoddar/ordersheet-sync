@@ -1,0 +1,10 @@
+# Used by `shopify app dev` (local only; production runs on Netlify, see netlify.toml).
+name = "React Router"
+roles = ["frontend", "backend"]
+webhooks_path = "/webhooks/app/uninstalled"
+
+[commands]
+# Generates the Prisma client and applies migrations for whatever DATABASE_URL points at
+# (Postgres -> prisma/schema.prisma, file: -> prisma/sqlite/schema.prisma).
+predev = "npm run setup"
+dev = "npx react-router dev"
