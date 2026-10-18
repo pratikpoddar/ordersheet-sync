@@ -13,14 +13,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { billing, shop, subscriptions, session } = await adminWithPlan(request);
+  const { billing, shop, subscriptions, session, isTest } = await adminWithPlan(request);
   const intent = String((await request.formData()).get("intent"));
   if (intent === "upgrade") {
     // Throws a redirect to Shopify's approval page (handled by the library inside the iframe).
     try {
       await billing.request({
         plan: PRO_PLAN,
-        isTest: config.billingTest(),
+        isTest,
         returnUrl: `https://admin.shopify.com/store/${session.shop.replace(".myshopify.com", "")}/apps/${config.apiKey()}/app`,
       });
     } catch (err) {
@@ -33,7 +33,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (intent === "cancel") {
     const sub = subscriptions.find((s) => s.name === PRO_PLAN && s.status === "ACTIVE");
     if (sub) {
-      await billing.cancel({ subscriptionId: sub.id, isTest: config.billingTest(), prorate: true });
+      await billing.cancel({ subscriptionId: sub.id, isTest, prorate: true });
       await setPlanFromSubscriptions(shop, []);
     }
     return { ok: true };
