@@ -15,8 +15,13 @@ export const config = {
    * (Level 2: name, email, address) for this app in the Partner Dashboard.
    */
   protectedCustomerData: () => bool(process.env.PROTECTED_CUSTOMER_DATA_ENABLED, false),
-  /** Billing test charges. Defaults to true unless NODE_ENV=production. */
-  billingTest: () => bool(process.env.BILLING_TEST, process.env.NODE_ENV !== "production"),
+  /**
+   * Billing test charges. BILLING_TEST=true forces test charges for every shop.
+   * Otherwise development/sandbox stores (incl. Shopify reviewers' stores) get test
+   * charges and real stores get real charges.
+   */
+  billingTest: (isDevStore = false) =>
+    bool(process.env.BILLING_TEST, process.env.NODE_ENV !== "production") || isDevStore,
   /**
    * Time budgets (ms) for serverless work units. Netlify: synchronous functions 60s,
    * scheduled functions 30s. Shopify wants a webhook response within 5s.
