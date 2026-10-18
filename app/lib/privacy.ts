@@ -1,11 +1,11 @@
 /**
  * Privacy policy served at /privacy. Keep in sync with LISTING.md.
- * Replace [CONTACT EMAIL] and [LEGAL NAME / COUNTRY] before submitting.
+ * Privacy policy text.
  */
 export const PRIVACY_POLICY_HTML = `
 <h1>OrderSheet Sync – Privacy Policy</h1>
 <p><em>Last updated: October 2026</em></p>
-<p>OrderSheet Sync ("the App") is provided by [LEGAL NAME / COUNTRY] ("we", "us"). This policy explains what information the App accesses when a merchant installs it on their Shopify store, and how we use, store and delete it.</p>
+<p>OrderSheet Sync ("the App") is provided by Pratik Poddar, an individual developer based in India ("we", "us"). This policy explains what information the App accesses when a merchant installs it on their Shopify store, and how we use, store and delete it.</p>
 
 <h2>Information we access</h2>
 <ul>
@@ -22,14 +22,14 @@ export const PRIVACY_POLICY_HTML = `
 <ul>
 <li>Order data is written directly to the Google Sheet in <strong>your</strong> Google Drive. The App's own database does <strong>not</strong> store order contents or customer personal data.</li>
 <li>Our database stores: your shop domain and settings, sync logs (timestamps, row counts, error messages), the Shopify session token, and your Google refresh token encrypted with AES-256-GCM.</li>
-<li>Our servers are hosted by [HOSTING PROVIDER, REGION]. Data is encrypted in transit (TLS).</li>
+<li>Our servers are hosted by Netlify (application) and Supabase on AWS us-east-1 (database). Data is encrypted in transit (TLS).</li>
 </ul>
 
 <h2>Sub-processors</h2>
 <ul>
 <li>Shopify Inc. (store platform and billing)</li>
 <li>Google LLC (Google Sheets / Drive API)</li>
-<li>[HOSTING PROVIDER] (application hosting and database)</li>
+<li>Netlify, Inc. and Supabase, Inc. (application hosting and database)</li>
 </ul>
 
 <h2>Retention and deletion</h2>
@@ -40,11 +40,11 @@ export const PRIVACY_POLICY_HTML = `
 </ul>
 
 <h2>Your rights</h2>
-<p>Merchants and their customers may request access to, correction of, or deletion of personal information by contacting us at [CONTACT EMAIL]. Requests from customers of a store are handled together with the merchant, who controls their order data. If you are in the EEA/UK, you may also complain to your local data protection authority.</p>
+<p>Merchants and their customers may request access to, correction of, or deletion of personal information by contacting us at pratik.phodu@gmail.com. Requests from customers of a store are handled together with the merchant, who controls their order data. If you are in the EEA/UK, you may also complain to your local data protection authority.</p>
 
 <h2>Google API Services User Data Policy</h2>
 <p>OrderSheet Sync's use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
 
 <h2>Changes and contact</h2>
-<p>We will post changes to this page and update the date above. Questions: [CONTACT EMAIL].</p>
+<p>We will post changes to this page and update the date above. Questions: pratik.phodu@gmail.com.</p>
 `;
