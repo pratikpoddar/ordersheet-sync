@@ -54,7 +54,7 @@ _(Same text as served at /privacy. Replace the bracketed placeholders before sub
 ### OrderSheet Sync – Privacy Policy
 _Last updated: October 2026_
 
-OrderSheet Sync ("the App") is provided by [LEGAL NAME / COUNTRY] ("we", "us"). This policy explains what information the App accesses when a merchant installs it on their Shopify store, and how we use, store and delete it.
+OrderSheet Sync ("the App") is provided by Pratik Poddar, an individual developer based in India ("we", "us"). This policy explains what information the App accesses when a merchant installs it on their Shopify store, and how we use, store and delete it.
 
 **Information we access**
 - **Shopify store information:** your shop domain, timezone, and an access token issued by Shopify so the App can read orders (read-only `read_orders` scope).
@@ -68,9 +68,9 @@ Solely to provide the App: to write your orders into your Google Sheet and keep 
 **Where data is stored**
 - Order data is written directly to the Google Sheet in **your** Google Drive. The App's own database does **not** store order contents or customer personal data.
 - Our database stores: your shop domain and settings, sync logs (timestamps, row counts, error messages), the Shopify session token, and your Google refresh token encrypted with AES-256-GCM.
-- Our servers are hosted by [HOSTING PROVIDER, REGION]. Data is encrypted in transit (TLS).
+- Our servers are hosted by Netlify (application) and Supabase on AWS us-east-1 (database). Data is encrypted in transit (TLS).
 
-**Sub-processors:** Shopify Inc. (platform and billing), Google LLC (Sheets/Drive API), [HOSTING PROVIDER] (hosting and database).
+**Sub-processors:** Shopify Inc. (platform and billing), Google LLC (Sheets/Drive API), Netlify, Inc. and Supabase, Inc. (hosting and database).
 
 **Retention and deletion**
 - Disconnecting Google revokes and deletes the Google token immediately.
@@ -78,13 +78,13 @@ Solely to provide the App: to write your orders into your Google Sheet and keep 
 - We honour Shopify's mandatory privacy webhooks: `customers/data_request`, `customers/redact` (we also blank customer cells for the affected orders in your sheet when customer columns are enabled) and `shop/redact`.
 
 **Your rights**
-Merchants and their customers may request access to, correction of, or deletion of personal information by contacting [CONTACT EMAIL]. Customer requests are handled together with the merchant, who controls their order data. EEA/UK residents may also complain to their local data protection authority.
+Merchants and their customers may request access to, correction of, or deletion of personal information by contacting pratik.phodu@gmail.com. Customer requests are handled together with the merchant, who controls their order data. EEA/UK residents may also complain to their local data protection authority.
 
 **Google API Services User Data Policy**
 OrderSheet Sync's use and transfer of information received from Google APIs adheres to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including the Limited Use requirements.
 
 **Changes and contact**
-We will post changes on this page and update the date above. Questions: [CONTACT EMAIL].
+We will post changes on this page and update the date above. Questions: pratik.phodu@gmail.com.
 
 ## Screenshot ideas (1600×900, 3+ required)
 1. **"Your orders, live in Google Sheets"**: split view. Left: the app dashboard (Connected as you@gmail.com · 1,284 orders · Last sync 2 min ago · green "success" log rows). Right: the Google Sheet with neat columns (Order, Created at, Payment status, Total, Line items) and a highlighted row labelled "updated 3s ago".
