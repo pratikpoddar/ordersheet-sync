@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, HeadersFunction, LoaderFunctionArgs } from "react-router";
-import { Form, useLoaderData, useNavigation } from "react-router";
+import { Form, useActionData, useLoaderData, useNavigation } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { config } from "../config.server";
 import { PRO_PLAN } from "../lib/plans";
@@ -17,11 +17,18 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const intent = String((await request.formData()).get("intent"));
   if (intent === "upgrade") {
     // Throws a redirect to Shopify's approval page (handled by the library inside the iframe).
-    await billing.request({
-      plan: PRO_PLAN,
-      isTest: config.billingTest(),
-      returnUrl: `https://admin.shopify.com/store/${session.shop.replace(".myshopify.com", "")}/apps/${config.apiKey()}/app`,
-    });
+    try {
+      await billing.request({
+        plan: PRO_PLAN,
+        isTest: config.billingTest(),
+        returnUrl: `https://admin.shopify.com/store/${session.shop.replace(".myshopify.com", "")}/apps/${config.apiKey()}/app`,
+      });
+    } catch (err) {
+      // A thrown Response is the redirect to Shopify's approval page: let it through.
+      if (err instanceof Response) throw err;
+      console.error("billing.request failed", err);
+      return { error: "We couldn't start the Pro trial right now. Please try again in a minute, or contact support." };
+    }
   }
   if (intent === "cancel") {
     const sub = subscriptions.find((s) => s.name === PRO_PLAN && s.status === "ACTIVE");
@@ -36,10 +43,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function Plans() {
   const { plan } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
   return (
     <s-page heading="Plans">
+      {actionData && "error" in actionData && actionData.error && (
+        <s-banner tone="critical">{actionData.error}</s-banner>
+      )}
       <s-grid gridTemplateColumns="1fr 1fr" gap="base">
         <s-section heading="Free">
           <s-stack gap="small-200">
