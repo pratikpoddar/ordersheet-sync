@@ -2,7 +2,7 @@ import db from "../db.server";
 import { config } from "../config.server";
 import { DEFAULT_COLUMNS, type ColumnKey } from "../lib/columns";
 import { EMPTY_FILTERS, type StatusFilters } from "../lib/filters";
-import { PRO_PLAN, sanitizeSettings, type EffectiveSettings, type PlanTier } from "../lib/plans";
+import { sanitizeSettings, type EffectiveSettings, type PlanTier } from "../lib/plans";
 import { revokeAndDelete } from "./google.server";
 
 export async function ensureShop(shop: string) {
@@ -14,8 +14,7 @@ export async function getPlan(shop: string): Promise<PlanTier> {
   return row?.plan === "PRO" ? "PRO" : "FREE";
 }
 
-export async function setPlanFromSubscriptions(shop: string, activeNames: string[]): Promise<PlanTier> {
-  const plan: PlanTier = activeNames.includes(PRO_PLAN) ? "PRO" : "FREE";
+export async function setPlan(shop: string, plan: PlanTier): Promise<PlanTier> {
   await db.shop.upsert({
     where: { shop },
     create: { shop, plan, planCheckedAt: new Date() },
