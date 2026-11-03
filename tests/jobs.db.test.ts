@@ -26,10 +26,13 @@ const fake = vi.hoisted(() => {
   return state;
 });
 
+vi.mock("../app/services/planSync.server", () => ({
+  fetchActiveSubscriptions: async () => [{ id: "gid://shopify/AppSubscription/1", name: "Pro", status: "ACTIVE", test: true, trialDays: 7, currentPeriodEnd: null }],
+}));
+
 vi.mock("../app/services/shopifyOrders.server", () => ({
   adminFor: async () => ({}),
   fetchShopTimezone: async () => "UTC",
-  fetchActivePlanNames: async () => ["OrderSheet Sync Pro"],
   fetchOrderById: async (_g: unknown, id: string) => fake.orders.find((o) => o.id === id) ?? null,
   fetchOrdersPage: async (_g: unknown, _q: string, opts: { after: string | null }) => {
     if (fake.pageDelayMs) await new Promise((r) => setTimeout(r, fake.pageDelayMs));
