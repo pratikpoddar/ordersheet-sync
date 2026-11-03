@@ -4,6 +4,38 @@ import { FINANCIAL_STATUSES, FULFILLMENT_STATUSES, type StatusFilters } from "./
 export const PRO_PLAN = "OrderSheet Sync Pro";
 export type PlanTier = "FREE" | "PRO";
 
+/**
+ * The app uses Shopify Managed Pricing (plans "Free" and "Pro" are defined in the Partner
+ * Dashboard). Plan changes happen on Shopify's hosted plan page, which also handles trials,
+ * test charges on development/review stores, approval, decline and the charge history.
+ * App handle as Shopify knows it (admin URL /apps/<handle>).
+ */
+export const APP_HANDLE = "ordersheet-sync-1";
+
+export function pricingPlansUrl(shopDomain: string, appHandle = APP_HANDLE): string {
+  const store = shopDomain.replace(/\.myshopify\.com$/i, "");
+  return `https://admin.shopify.com/store/${store}/charges/${appHandle}/pricing_plans`;
+}
+
+export interface SubscriptionLike {
+  name: string;
+  status: string;
+  lineItems?: { plan?: { pricingDetails?: { price?: { amount?: string | number } } } }[];
+}
+
+/** A paid subscription: the managed "Pro" plan, the legacy Billing API plan, or anything priced above $0. */
+export function isProSubscription(sub: SubscriptionLike): boolean {
+  const name = (sub.name || "").trim().toLowerCase();
+  if (name === PRO_PLAN.toLowerCase() || name === "pro" || /\bpro\b/.test(name)) return true;
+  if (name === "free") return false;
+  return (sub.lineItems ?? []).some((li) => Number(li.plan?.pricingDetails?.price?.amount ?? 0) > 0);
+}
+
+/** Tier from the shop's current subscriptions. Test (dev/review store) subscriptions count too. */
+export function tierFromSubscriptions(subs: SubscriptionLike[]): PlanTier {
+  return subs.some((s) => s.status === "ACTIVE" && isProSubscription(s)) ? "PRO" : "FREE";
+}
+
 export interface Entitlements {
   tier: PlanTier;
   maxSheets: number;
