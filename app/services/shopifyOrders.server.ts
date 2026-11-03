@@ -173,10 +173,3 @@ export async function fetchOrderById(graphql: AdminGraphql, orderId: string, inc
 }
 
 /** Reads active subscriptions straight from Shopify (used outside a request, e.g. by cron). */
-export async function fetchActivePlanNames(graphql: AdminGraphql): Promise<string[]> {
-  const data: any = await gql(graphql, `#graphql
-    query Plan { currentAppInstallation { activeSubscriptions { name status } } }`);
-  return (data.currentAppInstallation?.activeSubscriptions ?? [])
-    .filter((s: any) => s.status === "ACTIVE")
-    .map((s: any) => s.name);
-}
