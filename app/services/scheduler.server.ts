@@ -3,8 +3,10 @@ import { config } from "../config.server";
 import { Deadline, planSweep } from "../lib/jobs";
 import { isReconcileDue } from "../lib/schedule";
 import { runJobChunk, startJob, type ChunkOutcome } from "./jobs.server";
-import { adminFor, fetchActivePlanNames } from "./shopifyOrders.server";
-import { setPlanFromSubscriptions } from "./shopData.server";
+import { adminFor } from "./shopifyOrders.server";
+import { setPlan } from "./shopData.server";
+import { fetchActiveSubscriptions } from "./planSync.server";
+import { tierFromSubscriptions } from "../lib/plans";
 import { processDirtyOrders, processPendingRedactions } from "./webhookSync.server";
 
 /**
@@ -82,7 +84,7 @@ export async function runScheduledSweep(opts: { budgetMs?: number; now?: Date } 
   for (const c of stale) {
     if (!deadline.hasTimeFor(MIN_CHUNK_MS + TAIL_RESERVE_MS)) break;
     try {
-      const plan = await setPlanFromSubscriptions(c.shop, await fetchActivePlanNames(await adminFor(c.shop)));
+      const plan = await setPlan(c.shop, tierFromSubscriptions(await fetchActiveSubscriptions((await adminFor(c.shop)) as any)));
       shopRows.set(c.shop, { ...shopRows.get(c.shop)!, plan, planCheckedAt: new Date() });
       summary.planChecks++;
     } catch (e) {
